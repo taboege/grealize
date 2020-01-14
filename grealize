@@ -1,37 +1,23 @@
 #!/usr/bin/env perl
 
+=encoding utf8
+
 =head1 NAME
 
 grealize - A gaussoid to realization space compiler
 
 =head1 SYNOPSIS
 
-    # Print the semialgebraic system that describes the realization space
-    # of the positively oriented empty 4-gaussoid suitable for input into
-    # Wolfram Mathematica:
-    $ grealize -t pd -f mathematica -- $(perl -e 'print "+" x 24')
-    S = (1) > 0 &&
-      (1) > 0 &&
-      ...
-      (1 + -1*a^2) > 0 &&
-      (1 + -1*b^2) > 0 &&
-      ...
-      (1 + -1*a^2 + -1*b^2 + 2*a*b*d + -1*d^2) > 0 &&
-      (1 + -1*a^2 + -1*c^2 + 2*a*c*e + -1*e^2) > 0 &&
-      ...
-      (1 + -1*a^2 + -1*b^2 + -1*c^2 + 2*a*b*d + -1*d^2 + c^2*d^2 + 2*a*c*e + -2*b*c*d*e + -1*e^2 + b^2*e^2 + 2*b*c*f + -2*a*c*d*f + -2*a*b*e*f + 2*d*e*f + -1*f^2 + a^2*f^2) > 0 &&
-      (a) > 0 &&
-      (a + -1*b*d) > 0 &&
-      ...
+    grealize [-t TYPE] [-f FORMAT] -- GAUSSOID
 
 =cut
 
 use Modern::Perl;
-use Carp::Always;
-use utf8;
 use open qw(:std :utf8);
+use utf8;
 
 use Getopt::Long;
+use Pod::Usage;
 
 use Cube::Variables;
 use Cube::Vertices;
@@ -74,9 +60,12 @@ The default is I<mathematica>.
 =cut
 
 GetOptions(
-    "t|type" =>   \my $type,
+    "h|help"   => \my $help,
+    "t|type"   => \my $type,
     "f|format" => \my $format,
-) or die "could not parse options";
+) or pod2usage(2);
+
+pod2usage(-exitval => 0, -verbose => 1) if $help;
 
 # By default print a system that describes the space of realizations of
 # a gaussoid by positive definite matrices in a format that Mathematica
@@ -137,7 +126,7 @@ sub format_mathematica {
     "S = " . join(" && \n  ", @M)
 }
 
-my $G = shift // die "need a gaussoid or an oriented gaussoid";
+my $G = shift // pod2usage(2);
 my $n = Cube::Variables::_compute_dimension(length $G);
 
 my $system = lc($type) eq 'pd' ? realize_pd($n, $G) :
@@ -145,6 +134,27 @@ my $system = lc($type) eq 'pd' ? realize_pd($n, $G) :
 
 say lc($format) eq 'mathematica' ? format_mathematica($system) :
     die "unknown formatter '$format'";
+
+=head1 EXAMPLES
+
+Print the semialgebraic system that describes the realization space
+of the positively oriented empty 4-gaussoid suitable for input into
+Wolfram Mathematica:
+
+    $ grealize -t pd -f mathematica -- $(perl -e 'print "+" x 24')
+    S = (1) > 0 &&
+      (1) > 0 &&
+      ...
+      (1 + -1*a^2) > 0 &&
+      (1 + -1*b^2) > 0 &&
+      ...
+      (1 + -1*a^2 + -1*b^2 + 2*a*b*d + -1*d^2) > 0 &&
+      (1 + -1*a^2 + -1*c^2 + 2*a*c*e + -1*e^2) > 0 &&
+      ...
+      (1 + -1*a^2 + -1*b^2 + -1*c^2 + 2*a*b*d + -1*d^2 + c^2*d^2 + 2*a*c*e + -2*b*c*d*e + -1*e^2 + b^2*e^2 + 2*b*c*f + -2*a*c*d*f + -2*a*b*e*f + 2*d*e*f + -1*f^2 + a^2*f^2) > 0 &&
+      (a) > 0 &&
+      (a + -1*b*d) > 0 &&
+      ...
 
 =head1 AUTHOR
 
