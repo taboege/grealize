@@ -1,0 +1,73 @@
+=head1 NAME
+
+grealize - A gaussoid to realization space compiler
+
+=head1 SYNOPSIS
+
+    # Print the semialgebraic system that describes the realization space
+    # of the positively oriented empty 4-gaussoid suitable for input into
+    # Wolfram Mathematica:
+    $ grealize -t pd -f mathematica -- $(perl -e 'print "+" x 24')
+    S = (1) > 0 &&
+      (1) > 0 &&
+      ...
+      (1 + -1*a^2) > 0 &&
+      (1 + -1*b^2) > 0 &&
+      ...
+      (1 + -1*a^2 + -1*b^2 + 2*a*b*d + -1*d^2) > 0 &&
+      (1 + -1*a^2 + -1*c^2 + 2*a*c*e + -1*e^2) > 0 &&
+      ...
+      (1 + -1*a^2 + -1*b^2 + -1*c^2 + 2*a*b*d + -1*d^2 + c^2*d^2 + 2*a*c*e + -2*b*c*d*e + -1*e^2 + b^2*e^2 + 2*b*c*f + -2*a*c*d*f + -2*a*b*e*f + 2*d*e*f + -1*f^2 + a^2*f^2) > 0 &&
+      (a) > 0 &&
+      (a + -1*b*d) > 0 &&
+      ...
+
+=head1 OPTIONS
+
+=over
+
+=item B<-t>, B<--type>
+
+The type of realization space to describe:
+
+=over
+
+=item I<pd>
+Realizations by real, positive-definitive matrices.
+
+=back
+
+=item B<-f>, B<--format>
+
+How to format the realization space description:
+
+=over
+
+=item I<mathematica>
+Suitable for input into Wolfram Mathematica.
+
+=back
+
+=back
+
+=head1 DESCRIPTION
+
+This program takes as input a gaussoid (ordinary or oriented) as a string of
+either C<0> and C<1> or C<0>, C<+> and C<-> ASCII characters. Each character
+represents the sign assigned to a 2-face of the n-cube according to the ordering
+of 2-faces used by L<https://gaussoids.de>.
+
+The program then compiles and prints a description of a realization space of
+this (oriented) gaussoid. The notion of realization and the output format are
+configurable.
+
+=head1 AUTHOR
+
+Tobias Boege <tobs@taboege.de>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (C) 2020 by Tobias Boege.
+
+This is free software; you can redistribute it and/or
+modify it under the terms of the Artistic License 2.0.
