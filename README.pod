@@ -32,10 +32,13 @@ The type of realization space to describe:
 
 =over
 
-=item I<pd>
-Realizations by real, positive-definitive matrices.
+=item *
+
+I<pd>: realizations by real, positive-definitive matrices.
 
 =back
+
+The default is I<pd>.
 
 =item B<-f>, B<--format>
 
@@ -43,10 +46,13 @@ How to format the realization space description:
 
 =over
 
-=item I<mathematica>
-Suitable for input into Wolfram Mathematica.
+=item *
+
+I<mathematica>: suitable for input into Wolfram Mathematica.
 
 =back
+
+The default is I<mathematica>.
 
 =back
 

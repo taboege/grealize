@@ -24,45 +24,6 @@ grealize - A gaussoid to realization space compiler
       (a + -1*b*d) > 0 &&
       ...
 
-=head1 OPTIONS
-
-=over
-
-=item B<-t>, B<--type>
-
-The type of realization space to describe:
-
-=over
-
-=item I<pd>
-Realizations by real, positive-definitive matrices.
-
-=back
-
-=item B<-f>, B<--format>
-
-How to format the realization space description:
-
-=over
-
-=item I<mathematica>
-Suitable for input into Wolfram Mathematica.
-
-=back
-
-=back
-
-=head1 DESCRIPTION
-
-This program takes as input a gaussoid (ordinary or oriented) as a string of
-either C<0> and C<1> or C<0>, C<+> and C<-> ASCII characters. Each character
-represents the sign assigned to a 2-face of the n-cube according to the ordering
-of 2-faces used by L<https://gaussoids.de>.
-
-The program then compiles and prints a description of a realization space of
-this (oriented) gaussoid. The notion of realization and the output format are
-configurable.
-
 =cut
 
 use Modern::Perl;
@@ -76,6 +37,42 @@ use Cube::Variables;
 use Cube::Vertices;
 use Matrix::Formal;
 
+=head1 OPTIONS
+
+=over
+
+=item B<-t>, B<--type>
+
+The type of realization space to describe:
+
+=over
+
+=item *
+
+I<pd>: realizations by real, positive-definitive matrices.
+
+=back
+
+The default is I<pd>.
+
+=item B<-f>, B<--format>
+
+How to format the realization space description:
+
+=over
+
+=item *
+
+I<mathematica>: suitable for input into Wolfram Mathematica.
+
+=back
+
+The default is I<mathematica>.
+
+=back
+
+=cut
+
 GetOptions(
     "t|type" =>   \my $type,
     "f|format" => \my $format,
@@ -86,6 +83,19 @@ GetOptions(
 # understands.
 $type   //= 'pd';
 $format //= 'mathematica';
+
+=head1 DESCRIPTION
+
+This program takes as input a gaussoid (ordinary or oriented) as a string of
+either C<0> and C<1> or C<0>, C<+> and C<-> ASCII characters. Each character
+represents the sign assigned to a 2-face of the n-cube according to the ordering
+of 2-faces used by L<https://gaussoids.de>.
+
+The program then compiles and prints a description of a realization space of
+this (oriented) gaussoid. The notion of realization and the output format are
+configurable.
+
+=cut
 
 sub realize_pd {
     my ($n, $G) = @_;
