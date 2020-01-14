@@ -1,0 +1,148 @@
+#!/usr/bin/env perl
+
+=head1 NAME
+
+grealize - A gaussoid to realization space compiler
+
+=head1 SYNOPSIS
+
+    # Print the semialgebraic system that describes the realization space
+    # of the positively oriented empty 4-gaussoid suitable for input into
+    # Wolfram Mathematica:
+    $ grealize -t pd -f mathematica -- $(perl -e 'print "+" x 24')
+    S = (1) > 0 &&
+      (1) > 0 &&
+      ...
+      (1 + -1*a^2) > 0 &&
+      (1 + -1*b^2) > 0 &&
+      ...
+      (1 + -1*a^2 + -1*b^2 + 2*a*b*d + -1*d^2) > 0 &&
+      (1 + -1*a^2 + -1*c^2 + 2*a*c*e + -1*e^2) > 0 &&
+      ...
+      (1 + -1*a^2 + -1*b^2 + -1*c^2 + 2*a*b*d + -1*d^2 + c^2*d^2 + 2*a*c*e + -2*b*c*d*e + -1*e^2 + b^2*e^2 + 2*b*c*f + -2*a*c*d*f + -2*a*b*e*f + 2*d*e*f + -1*f^2 + a^2*f^2) > 0 &&
+      (a) > 0 &&
+      (a + -1*b*d) > 0 &&
+      ...
+
+=head1 OPTIONS
+
+=over
+
+=item B<-t>, B<--type>
+
+The type of realization space to describe:
+
+=over
+
+=item I<pd>
+Realizations by real, positive-definitive matrices.
+
+=back
+
+=item B<-f>, B<--format>
+
+How to format the realization space description:
+
+=over
+
+=item I<mathematica>
+Suitable for input into Wolfram Mathematica.
+
+=back
+
+=back
+
+=head1 DESCRIPTION
+
+This program takes as input a gaussoid (ordinary or oriented) as a string of
+either C<0> and C<1> or C<0>, C<+> and C<-> ASCII characters. Each character
+represents the sign assigned to a 2-face of the n-cube according to the ordering
+of 2-faces used by L<https://gaussoids.de>.
+
+The program then compiles and prints a description of a realization space of
+this (oriented) gaussoid. The notion of realization and the output format are
+configurable.
+
+=cut
+
+use Modern::Perl;
+use Carp::Always;
+use utf8;
+use open qw(:std :utf8);
+
+use Getopt::Long;
+
+use Cube::Variables;
+use Cube::Vertices;
+use Matrix::Formal;
+
+GetOptions(
+    "t|type" =>   \my $type,
+    "f|format" => \my $format,
+) or die "could not parse options";
+
+# By default print a system that describes the space of realizations of
+# a gaussoid by positive definite matrices in a format that Mathematica
+# understands.
+$type   //= 'pd';
+$format //= 'mathematica';
+
+sub realize_pd {
+    my ($n, $G) = @_;
+    my $A = symmetric_matrix $n;
+    my @system;
+
+    # Positive definiteness
+    my $verts = Cube::Vertices->new($n);
+    for my $I ($verts->list) {
+        my $poly = pr($A, $I);
+        push @system, [$poly, '+'];
+    }
+
+    # Gaussoid structure
+    my $vars = Cube::Variables->new($n);
+    for my $ijK ($vars->list) {
+        my $poly = apr($A, $ijK);
+        my $i = $vars->pack($ijK);
+        push @system, [$poly, substr($G,$i-1,1)];
+    }
+
+    \@system
+}
+
+sub format_mathematica {
+    my @M;
+    for (@{+shift}) {
+        use experimental qw(switch);
+        my ($poly, $sign) = @$_;
+        for ($sign) {
+            when ('+') { push @M, "$poly > 0"  }
+            when ('-') { push @M, "$poly < 0"  }
+            when ('1') { push @M, "$poly != 0" }
+            when ('0') { push @M, "$poly == 0" }
+            default    { die "don't understand constraint '$_'" }
+        }
+    }
+
+    "S = " . join(" && \n  ", @M)
+}
+
+my $G = shift // die "need a gaussoid or an oriented gaussoid";
+my $n = Cube::Variables::_compute_dimension(length $G);
+
+my $system = lc($type) eq 'pd' ? realize_pd($n, $G) :
+    die "unknown realization type '$type'";
+
+say lc($format) eq 'mathematica' ? format_mathematica($system) :
+    die "unknown formatter '$format'";
+
+=head1 AUTHOR
+
+Tobias Boege <tobs@taboege.de>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (C) 2020 by Tobias Boege.
+
+This is free software; you can redistribute it and/or
+modify it under the terms of the Artistic License 2.0.
