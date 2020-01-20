@@ -8,7 +8,8 @@ grealize - A gaussoid to realization space compiler
 
 =head1 SYNOPSIS
 
-    grealize [-t TYPE] [-f FORMAT] -- GAUSSOID
+    grealize -t pd  [-f FORMAT] -- GAUSSOID
+    grealize -t sem [-f FORMAT] -- DIGRAPH... GAUSSOID
 
 =cut
 
@@ -36,6 +37,11 @@ The type of realization space to describe:
 =item *
 
 I<pd>: realizations by real, positive-definitive matrices.
+
+=item *
+
+I<sem>: realizations by structural equation models (SEM) having
+uncorrelated, normalized noise terms.
 
 =back
 
@@ -108,6 +114,27 @@ sub pd_system {
     \@system
 }
 
+sub realize_pd {
+    my $G = shift // pod2usage(2);
+    my $n = Cube::Variables::_compute_dimension(length $G);
+    pd_system $n, $G, Matrix::Formal->generic_symmetric($n)
+}
+
+sub realize_sem {
+    use Graph::Directed;
+
+    # TODO: Ultimately we want to be able to compute the gaussoid from
+    # the DAG (no problem) and determine all its orientations and for
+    # each of those make a system here. We lack the propcalc package
+    # to compute orientations quickly, so currently that must be done
+    # by the human before calling this program.
+    my $G = pop // pod2usage(2);
+    pod2usage(2) unless @_;
+    my $D = Graph::Directed->new(@_);
+    my $n = 0+ $D->vertices;
+    pd_system $n, $G, Matrix::Formal->generic_sem($D)
+}
+
 sub format_mathematica {
     my @M;
     for (@{+shift}) {
@@ -125,10 +152,8 @@ sub format_mathematica {
     "S = " . join(" && \n  ", @M)
 }
 
-my $G = shift // pod2usage(2);
-my $n = Cube::Variables::_compute_dimension(length $G);
-
-my $system = lc($type) eq 'pd' ? realize_pd($n, $G) :
+my $system = lc($type) eq 'pd'  ? realize_pd(@ARGV)  :
+             lc($type) eq 'sem' ? realize_sem(@ARGV) :
     die "unknown realization type '$type'";
 
 say lc($format) eq 'mathematica' ? format_mathematica($system) :
@@ -154,6 +179,17 @@ Print the semialgebraic system that describes the classical realization space
       (a) > 0 &&
       (a + -1*b*d) > 0 &&
       ...
+
+Semialgebraic system for the space of parameters of an SEM (with uncorrelated
+noise of variance 1) for the 4-path as a DAG, which satisfies the constraints
+of the attached 4-gaussoid (which is the d-separation graphoid of the DAG):
+
+    $ grealize -t sem -- 12 23 34 111110101000111111001111
+
+This effectively describes the "generic part" of the Gaussian structural
+equation model of the 4-path. By picking orientations of this gaussoid,
+positive or negative correlations can be imposed on the model, extracting
+subcomponents of this generic part.
 
 =head1 AUTHOR
 

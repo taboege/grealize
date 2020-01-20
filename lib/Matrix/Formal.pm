@@ -41,6 +41,10 @@ sub identity {
     $A
 }
 
+# TODO: Variable naming should be left to the user. I can imagine
+# handling a callable or an object that overloads ++. Then we could
+# reuse generic_* in generic_sem construction.
+
 # Make a generic symmetric nxn matrix with constant $diag on the
 # diagonal, which is 1 by default.
 sub generic_symmetric {
@@ -76,13 +80,29 @@ sub generic_triangular {
     $A
 }
 
-# Make a Lambda matrix for a structural equation model corresponding
-# to the given DAG. The Lambda matrix is a strictly upper-triangular
-# matrix with zeros on exactly those entries (i,j) that are non-edges
-# in the underlying digraph. The corresponds to the (ij|N \ ij)-entry
-# in the gaussoid being zero.
+# Make the covariance matrix of the generic Gaussian for the structural
+# equation model corresponding to the given DAG.
 sub generic_sem {
-    ...
+    my ($class, $D, $lname, $oname) = @_;
+    my $n = 0+ $D->vertices;
+    $lname //= 'a';
+    $oname //= 'b';
+
+    my $Lambda = __PACKAGE__->zero($n);
+    for my $i (1 .. $n) {
+        for my $j ($i+1 .. $n) {
+            $Lambda->[$i-1]->[$j-1] = $D->{$i}->{out}->{$j} ?
+                Math::Polynomial::Multivariate->var("$lname$i$j") :
+                Math::Polynomial::Multivariate->const(0);
+        }
+    }
+
+    # For now just uncorrelated, normed noise (i.e. nothing).
+    my $Omega = __PACKAGE__->identity($n);
+
+    my $E = __PACKAGE__->identity($n);
+    my $K = ($E - $Lambda)->inv;
+    $K->transpose * $Omega * $K
 }
 
 sub view {
