@@ -60,9 +60,9 @@ The default is I<mathematica>.
 =cut
 
 GetOptions(
-    "h|help"   => \my $help,
-    "t|type"   => \my $type,
-    "f|format" => \my $format,
+    "h|help"     => \my $help,
+    "t|type=s"   => \my $type,
+    "f|format=s" => \my $format,
 ) or pod2usage(2);
 
 pod2usage(-exitval => 0, -verbose => 1) if $help;
@@ -86,22 +86,21 @@ configurable.
 
 =cut
 
-sub realize_pd {
-    my ($n, $G) = @_;
-    my $A = symmetric_matrix $n;
+sub pd_system {
+    my ($n, $G, $A) = @_;
     my @system;
 
     # Positive definiteness
     my $verts = Cube::Vertices->new($n);
     for my $I ($verts->list) {
-        my $poly = pr($A, $I);
+        my $poly = $A->pr($I);
         push @system, [$poly, '+'];
     }
 
     # Gaussoid structure
     my $vars = Cube::Variables->new($n);
     for my $ijK ($vars->list) {
-        my $poly = apr($A, $ijK);
+        my $poly = $A->apr($ijK);
         my $i = $vars->pack($ijK);
         push @system, [$poly, substr($G,$i-1,1)];
     }
@@ -137,9 +136,9 @@ say lc($format) eq 'mathematica' ? format_mathematica($system) :
 
 =head1 EXAMPLES
 
-Print the semialgebraic system that describes the realization space
-of the positively oriented empty 4-gaussoid suitable for input into
-Wolfram Mathematica:
+Print the semialgebraic system that describes the classical realization space
+(positive-definite covariance matrices) of the positively oriented empty
+4-gaussoid suitable for input into Wolfram Mathematica:
 
     $ grealize -t pd -f mathematica -- $(perl -e 'print "+" x 24')
     S = (1) > 0 &&
