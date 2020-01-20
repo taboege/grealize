@@ -101,6 +101,23 @@ space, ready for immediate bulk pasting into Mathematica.
 This allows to quickly determine which I<orientations> of the DAG-representable
 gaussoids are actually realizable, in the oriented sense, by SEMs.
 
+    $ dag-model.sh 12 23 /tmp/ocnf3-list.txt
+    (* 12 23 ---0++ *)
+    S = (1) > 0 && (1) > 0 && (1 + a12^2) > 0 && (1 + a23^2 + a12^2*a23^2) > 0 && (1) > 0 && (1 + a23^2) > 0 && (1 + a12^2) > 0 && (1) > 0 && (a12) < 0 && (a12) < 0 && (a12*a23) < 0 && (0) == 0 && (a23 + a12^2*a23) > 0 && (a23) > 0;
+    FindInstance[S, { a12, a23 }, Reals]
+    
+    (* 12 23 --+0-- *)
+    S = (1) > 0 && (1) > 0 && (1 + a12^2) > 0 && (1 + a23^2 + a12^2*a23^2) > 0 && (1) > 0 && (1 + a23^2) > 0 && (1 + a12^2) > 0 && (1) > 0 && (a12) < 0 && (a12) < 0 && (a12*a23) > 0 && (0) == 0 && (a23 + a12^2*a23) < 0 && (a23) < 0;
+    FindInstance[S, { a12, a23 }, Reals]
+    
+    (* 12 23 ++-0-- *)
+    S = (1) > 0 && (1) > 0 && (1 + a12^2) > 0 && (1 + a23^2 + a12^2*a23^2) > 0 && (1) > 0 && (1 + a23^2) > 0 && (1 + a12^2) > 0 && (1) > 0 && (a12) > 0 && (a12) > 0 && (a12*a23) < 0 && (0) == 0 && (a23 + a12^2*a23) < 0 && (a23) < 0;
+    FindInstance[S, { a12, a23 }, Reals]
+    
+    (* 12 23 +++0++ *)
+    S = (1) > 0 && (1) > 0 && (1 + a12^2) > 0 && (1 + a23^2 + a12^2*a23^2) > 0 && (1) > 0 && (1 + a23^2) > 0 && (1 + a12^2) > 0 && (1) > 0 && (a12) > 0 && (a12) > 0 && (a12*a23) > 0 && (0) == 0 && (a23 + a12^2*a23) > 0 && (a23) > 0;
+    FindInstance[S, { a12, a23 }, Reals]
+
 =head1 AUTHOR
 
 Tobias Boege <tobs@taboege.de>
