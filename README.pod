@@ -6,7 +6,8 @@ grealize - A gaussoid to realization space compiler
 
 =head1 SYNOPSIS
 
-    grealize [-t TYPE] [-f FORMAT] -- GAUSSOID
+    grealize -t pd  [-f FORMAT] -- GAUSSOID
+    grealize -t sem [-f FORMAT] -- DIGRAPH... GAUSSOID
 
 =head1 OPTIONS
 
@@ -21,6 +22,11 @@ The type of realization space to describe:
 =item *
 
 I<pd>: realizations by real, positive-definitive matrices.
+
+=item *
+
+I<sem>: realizations by structural equation models (SEM) having
+uncorrelated, normalized noise terms.
 
 =back
 
@@ -55,9 +61,9 @@ configurable.
 
 =head1 EXAMPLES
 
-Print the semialgebraic system that describes the realization space
-of the positively oriented empty 4-gaussoid suitable for input into
-Wolfram Mathematica:
+Print the semialgebraic system that describes the classical realization space
+(positive-definite covariance matrices) of the positively oriented empty
+4-gaussoid suitable for input into Wolfram Mathematica:
 
     $ grealize -t pd -f mathematica -- $(perl -e 'print "+" x 24')
     S = (1) > 0 &&
@@ -73,6 +79,17 @@ Wolfram Mathematica:
       (a) > 0 &&
       (a + -1*b*d) > 0 &&
       ...
+
+Semialgebraic system for the space of parameters of an SEM (with uncorrelated
+noise of variance 1) for the 4-path as a DAG, which satisfies the constraints
+of the attached 4-gaussoid (which is the d-separation graphoid of the DAG):
+
+    $ grealize -t sem -- 12 23 34 111110101000111111001111
+
+This effectively describes the "generic part" of the Gaussian structural
+equation model of the 4-path. By picking orientations of this gaussoid,
+positive or negative correlations can be imposed on the model, extracting
+subcomponents of this generic part.
 
 =head1 AUTHOR
 
