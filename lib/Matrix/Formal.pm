@@ -82,6 +82,11 @@ sub generic_triangular {
 
 # Make the covariance matrix of the generic Gaussian for the structural
 # equation model corresponding to the given DAG.
+#
+# Care must be taken that the vertices of the DAG are properly ordered
+# so that each edge ($i,$j) has $i < $j. Otherwise the system would be
+# wrong. We detect this and abort instead of fixing this by doing a
+# topological sort on the DAG.
 sub generic_sem {
     my ($class, $D, $lname, $oname) = @_;
     my $n = 0+ $D->vertices;
@@ -91,6 +96,8 @@ sub generic_sem {
     my $Lambda = __PACKAGE__->zero($n);
     for my $i (1 .. $n) {
         for my $j ($i+1 .. $n) {
+            die "DAG is incorrectly sorted as it has an edge $i <- $j"
+                if $D->{$i}->{in}->{$j};
             $Lambda->[$i-1]->[$j-1] = $D->{$i}->{out}->{$j} ?
                 Math::Polynomial::Multivariate->var("$lname$i$j") :
                 Math::Polynomial::Multivariate->const(0);
