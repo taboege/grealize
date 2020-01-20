@@ -149,7 +149,7 @@ sub format_mathematica {
         }
     }
 
-    "S = " . join(" && \n  ", @M)
+    "S = " . join(" && ", @M)
 }
 
 my $system = lc($type) eq 'pd'  ? realize_pd(@ARGV)  :
@@ -190,6 +190,16 @@ This effectively describes the "generic part" of the Gaussian structural
 equation model of the 4-path. By picking orientations of this gaussoid,
 positive or negative correlations can be imposed on the model, extracting
 subcomponents of this generic part.
+
+This distribution also contains a convenience script C<dag-model.sh> which,
+when provided with a DAG and a database of oriented gaussoids, such as the
+ones obtainable from L<https://gaussoids.de>, calls C<grealize> with the
+DAG and each orientation of the DAG's d-separation graphoid, printing each
+system for the SEM intersected with the oriented gaussoid's realization
+space, ready for immediate bulk pasting into Mathematica.
+
+This allows to quickly determine which I<orientations> of the DAG-representable
+gaussoids are actually realizable, in the oriented sense, by SEMs.
 
 =head1 AUTHOR
 
