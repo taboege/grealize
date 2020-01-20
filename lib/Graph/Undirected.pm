@@ -20,7 +20,7 @@ sub new {
         my ($i, $j) = split //;
         # Isolated vertices are ok, just add them to the list of vertices.
         if ($j eq "") {
-            $self->{$i} = {};
+            $self->{$i} //= {};
             next;
         }
         $self->{$i}->{$j} = 1;
